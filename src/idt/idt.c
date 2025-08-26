@@ -30,5 +30,6 @@ void idt_init() {
     idt_set(0, idt_zero);
 
     // Load the interrupt descriptor table.
+    // This is actually defined in idt.asm. Address is resolved during linking.
     idt_load(&idtr_descriptor);
 }

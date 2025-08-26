@@ -57,7 +57,7 @@ void terminal_initialize() {
 
 void kernel_main() {
     terminal_initialize();
-    terminal_print("Hello, World!\nI'm Ravi.");
+    terminal_print("Hello, World!\nWelcome to RasOS!\n");
 
     // Initialize the interrupt descriptor table.
     idt_init();

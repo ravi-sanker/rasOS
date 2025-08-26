@@ -3,6 +3,10 @@
 BITS 32
 
 global _start
+
+; kernel_main is exposed in kernel.h and implemented in kernel.c.
+; We are using extern here to tell the assembler that this symbol needs
+; to be resolved in the linking stage.
 extern kernel_main
 
 DATA_SEG_GDT_OFFSET equ 0x10 ; hardcode it for now
