@@ -3,6 +3,7 @@
 BITS 32
 
 global _start
+extern kernel_main
 
 DATA_SEG_GDT_OFFSET equ 0x10 ; hardcode it for now
 
@@ -21,4 +22,11 @@ _start:
     or al, 2
     out 0x92, al
     
+    call kernel_main
+
     jmp $
+
+; This is done so that the kernel code takes up an entire sector and the C code
+; that follows this won't be misaligned. Note that kernel.asm needs to come at
+; the very beginning and isn't part of the asm section.
+times 512 - ($ - $$) db 0
