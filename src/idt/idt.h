@@ -20,4 +20,4 @@ struct idtr_desc {
 
 void idt_init();
 
-#endif 
+#endif

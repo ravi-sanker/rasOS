@@ -1,5 +1,6 @@
 OBJECT_FILES = ./build/kernel.asm.o ./build/kernel.o ./build/idt/idt.asm.o \
-	./build/memory/memory.o ./build/idt/idt.o ./build/io/io.asm.o 
+	./build/memory/memory.o ./build/idt/idt.o ./build/io/io.asm.o \
+	./build/memory/heap/heap.o ./build/memory/heap/kheap.o
 
 INCLUDES =  -I./src
 
@@ -51,16 +52,25 @@ all: clean directories ./bin/boot.bin ./bin/kernel.bin
 ./build/io/io.asm.o: ./src/io/io.asm
 	nasm -f elf -g ./src/io/io.asm -o ./build/io/io.asm.o
 
-# ./build/io/io.o: ./src/io/io.c
-# 	i686-elf-gcc $(INCLUDES) -I./src/io $(C_FLAGS) -std=gnu99 -c ./src/io/io.c -o ./build/io/io.o
+./build/memory/heap/heap.o: ./src/memory/heap/heap.c
+	i686-elf-gcc $(INCLUDES) -I./src/heap $(C_FLAGS) -std=gnu99 -c ./src/memory/heap/heap.c -o ./build/memory/heap/heap.o
+
+./build/memory/heap/kheap.o: ./src/memory/heap/kheap.c
+	i686-elf-gcc $(INCLUDES) -I./src/heap $(C_FLAGS) -std=gnu99 -c ./src/memory/heap/kheap.c -o ./build/memory/heap/kheap.o
 
 #-------------------------------------------------------------------------------
 
 directories:
-	cd ./bin && mkdir -p memory && mkdir -p idt && mkdir -p io && cd ..
-	cd ./build && mkdir -p memory && mkdir -p idt && mkdir -p io && cd ..
+	cd ./build && mkdir -p memory && mkdir -p idt && mkdir -p io && cd memory && mkdir -p heap && cd ../..
 .PHONY: directories
 
 clean:
 	rm -rf ./bin/*
 	rm -rf ./build/*
+
+#-------------------------------------------------------------------------------
+
+# Useful GDB commands:
+# target remote | qemu-system-i386 -hda ./bin/os.bin -S -gdb stdio
+# add-symbol-file ./build/kernelfull.o 0x100000
+# break file_name:line_number
