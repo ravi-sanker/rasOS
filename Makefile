@@ -1,4 +1,5 @@
-OBJECT_FILES = ./build/kernel.asm.o ./build/kernel.o ./build/idt/idt.asm.o ./build/memory/memory.o ./build/idt/idt.o
+OBJECT_FILES = ./build/kernel.asm.o ./build/kernel.o ./build/idt/idt.asm.o \
+	./build/memory/memory.o ./build/idt/idt.o ./build/io/io.asm.o 
 
 INCLUDES =  -I./src
 
@@ -44,17 +45,20 @@ all: clean directories ./bin/boot.bin ./bin/kernel.bin
 ./build/idt/idt.o: ./src/idt/idt.c
 	i686-elf-gcc $(INCLUDES) -I./src/idt $(C_FLAGS) -std=gnu99 -c ./src/idt/idt.c -o ./build/idt/idt.o
 
-./build/memory/memory.asm.o: ./src/memory/memory.asm
-	nasm -f elf -g ./src/memory/memory.asm -o ./build/memory/memory.asm.o
-
 ./build/memory/memory.o: ./src/memory/memory.c
 	i686-elf-gcc $(INCLUDES) -I./src/memory $(C_FLAGS) -std=gnu99 -c ./src/memory/memory.c -o ./build/memory/memory.o
+
+./build/io/io.asm.o: ./src/io/io.asm
+	nasm -f elf -g ./src/io/io.asm -o ./build/io/io.asm.o
+
+# ./build/io/io.o: ./src/io/io.c
+# 	i686-elf-gcc $(INCLUDES) -I./src/io $(C_FLAGS) -std=gnu99 -c ./src/io/io.c -o ./build/io/io.o
 
 #-------------------------------------------------------------------------------
 
 directories:
-	cd ./bin && mkdir -p memory && mkdir -p idt && cd ..
-	cd ./build && mkdir -p memory && mkdir -p idt && cd ..
+	cd ./bin && mkdir -p memory && mkdir -p idt && mkdir -p io && cd ..
+	cd ./build && mkdir -p memory && mkdir -p idt && mkdir -p io && cd ..
 .PHONY: directories
 
 clean:
