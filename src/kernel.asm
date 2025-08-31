@@ -57,8 +57,6 @@ _start:
 	out	MASTER_PIC_IMR_AND_DATA_REG, al
 	out	SLAVE_PIC_IMR_AND_DATA_REG, al
 
-    sti
-
     call kernel_main
 
     jmp $
