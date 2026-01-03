@@ -9,12 +9,32 @@ BITS 16
 CODE_SEG_GDT_OFFSET equ gdt_code - gdt_start
 DATA_SEG_GDT_OFFSET equ gdt_data - gdt_start
 
-; The BIOS might use the first 33 bytes to write data known as the
-; BIOS Parameter Block (BPB). Refer wiki.osdev.org/FAT.
-_start:            
-    jmp short start ; The first two bytes need be this for some BIOS to work. You're
-    nop             ; basically jumping over to the instructions and skipping data.  
-times 33 db 0       
+
+; BIOS Parameter Block (BPB). Refer wiki.osdev.org/FAT.      
+jmp short start ; The first two bytes need be this for some BIOS to work. You're
+nop             ; basically jumping over to the instructions and skipping data.  
+
+; FAT16 Headers
+OEMIdentifier           db 'RASOS   '
+BytesPerSector          dw 0x200    ; 512 bytes
+SectorsPerCluster       db 0x80     ; 128 sectors per cluster
+ReservedSectors         dw 200      ; 200 reserved clusters for kernel
+FATCopies               db 0x02     
+RootDirEntries          dw 0x40
+NumSectors              dw 0x00
+MediaType               db 0xF8
+SectorsPerFAT           dw 0x100
+SectorsPerTrack         dw 0x20
+NumberOfHeads           dw 0x40
+HiddenSectors           dd 0x00
+SectorsBig              dd 0x773594
+; Extended BPB
+DriveNumber             db 0x80
+WinNTBit                db 0x00
+Signature               db 0x29
+VolumeID                dd 0xD105
+VolumeIDString          db 'RASOS BOOTL'    ; needs to be 11 bytes
+SystemIDString          db 'FAT16   '       ; needs to be 8 bytes       
  
 start:
     jmp 0:main ; Make sure CS is set to 0x0000 as BIOS could've set it to 0x07c0.

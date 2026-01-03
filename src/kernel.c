@@ -6,19 +6,14 @@
 #include "memory/heap/kheap.h"
 #include "memory/paging/paging.h"
 #include "disk/disk.h"
+#include "string/string.h"
+#include "fs/pparser.h"
+#include "disk/streamer.h"
 
 uint16_t *video_mem = 0;
 uint16_t terminal_current_row = 0;
 uint16_t terminal_current_col = 0;
 static struct paging_4gb_chunk* kernel_chunk = 0;
-
-size_t strlen(const char* str) {
-    size_t len = 0;
-    while(str[len] != '\0') {
-        len++;
-    }
-    return len;
-}
 
 uint16_t terminal_make_char(char c, char colour) {
     // colour needs to come to the left due to the little endian format.
@@ -81,4 +76,11 @@ void kernel_main() {
     enable_paging();
 
     enable_interrupts();
+
+    enable_interrupts();
+    struct disk_stream* stream = diskstreamer_new(0);
+    diskstreamer_seek(stream, 0x201);
+    unsigned char c = 0;
+    diskstreamer_read(stream, &c, 1);
+    while(1) {}
 }

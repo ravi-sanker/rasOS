@@ -2,7 +2,8 @@ OBJECT_FILES = ./build/kernel.asm.o ./build/kernel.o ./build/idt/idt.asm.o \
 	./build/memory/memory.o ./build/idt/idt.o ./build/io/io.asm.o \
 	./build/memory/heap/heap.o ./build/memory/heap/kheap.o \
 	./build/memory/paging/paging.o ./build/memory/paging/paging.asm.o \
-	./build/disk/disk.o
+	./build/disk/disk.o ./build/disk/streamer.o ./build/fs/pparser.o \
+	./build/string/string.o
 
 INCLUDES =  -I./src
 
@@ -15,7 +16,7 @@ C_FLAGS = -g -ffreestanding -falign-jumps -falign-functions -falign-labels \
 all: clean directories ./bin/boot.bin ./bin/kernel.bin
 	dd if=./bin/boot.bin >> ./bin/os.bin
 	dd if=./bin/kernel.bin >> ./bin/os.bin
-	dd if=/dev/zero bs=512 count=100 >> ./bin/os.bin
+	dd if=/dev/zero bs=1048576 count=16 >> ./bin/os.bin
 .PHONY: all
 
 #-------------------------------------------------------------------------------
@@ -69,11 +70,21 @@ all: clean directories ./bin/boot.bin ./bin/kernel.bin
 ./build/disk/disk.o: ./src/disk/disk.c
 	i686-elf-gcc $(INCLUDES) -I./src/disk $(C_FLAGS) -std=gnu99 -c ./src/disk/disk.c -o ./build/disk/disk.o
 
+./build/disk/streamer.o: ./src/disk/streamer.c
+	i686-elf-gcc $(INCLUDES) -I./src/disk $(C_FLAGS) -std=gnu99 -c ./src/disk/streamer.c -o ./build/disk/streamer.o
+
+./build/fs/pparser.o: ./src/fs/pparser.c
+	i686-elf-gcc $(INCLUDES) -I./src/fs $(C_FLAGS) -std=gnu99 -c ./src/fs/pparser.c -o ./build/fs/pparser.o
+
+./build/string/string.o: ./src/string/string.c
+	i686-elf-gcc $(INCLUDES) -I./src/string $(C_FLAGS) -std=gnu99 -c ./src/string/string.c -o ./build/string/string.o
 #-------------------------------------------------------------------------------
 
 directories:
-	cd ./build && mkdir -p memory && mkdir -p idt && mkdir -p io && mkdir -p disk
+	cd ./build && mkdir -p memory && mkdir -p idt && mkdir -p io && mkdir -p disk \
+	&& mkdir -p fs && mkdir -p string
 	cd ./build/memory && mkdir -p heap && mkdir -p paging && cd ..
+	mkdir -p ./mnt/d && echo "Hello, World!" > hello.txt
 .PHONY: directories
 
 clean:
