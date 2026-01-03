@@ -1,5 +1,6 @@
 ; boot.asm
 
+; BIOS loads the bootloader at 0x7c00.
 ORG 0x7c00  
 ; When this code is run, the CPU will be in real mode. So we need to tell the
 ; assembler to use 16-bit code.
@@ -11,12 +12,12 @@ DATA_SEG_GDT_OFFSET equ gdt_data - gdt_start
 ; The BIOS might use the first 33 bytes to write data known as the
 ; BIOS Parameter Block (BPB). Refer wiki.osdev.org/FAT.
 _start:            
-    jmp short start ; The first two bytes need be this for some BIOS to work.
-    nop             
+    jmp short start ; The first two bytes need be this for some BIOS to work. You're
+    nop             ; basically jumping over to the instructions and skipping data.  
 times 33 db 0       
  
 start:
-    jmp 0:main ; Set the code segment to 0x7c0.
+    jmp 0:main ; Make sure CS is set to 0x0000 as BIOS could've set it to 0x07c0.
 
 main:
     cli ; Disable interrupts.
@@ -33,6 +34,7 @@ main:
 .load_protected:
     cli
     lgdt[gdt_descriptor]
+    ; Set 0th bit of CR0 to 1 to enable protected mode.
     mov eax, cr0
     or eax, 0x1
     mov cr0, eax
