@@ -1,7 +1,8 @@
 OBJECT_FILES = ./build/kernel.asm.o ./build/kernel.o ./build/idt/idt.asm.o \
 	./build/memory/memory.o ./build/idt/idt.o ./build/io/io.asm.o \
 	./build/memory/heap/heap.o ./build/memory/heap/kheap.o \
-	./build/memory/paging/paging.o ./build/memory/paging/paging.asm.o
+	./build/memory/paging/paging.o ./build/memory/paging/paging.asm.o \
+	./build/disk/disk.o
 
 INCLUDES =  -I./src
 
@@ -65,10 +66,13 @@ all: clean directories ./bin/boot.bin ./bin/kernel.bin
 ./build/memory/paging/paging.asm.o: ./src/memory/paging/paging.asm
 	nasm -f elf -g ./src/memory/paging/paging.asm -o ./build/memory/paging/paging.asm.o
 
+./build/disk/disk.o: ./src/disk/disk.c
+	i686-elf-gcc $(INCLUDES) -I./src/disk $(C_FLAGS) -std=gnu99 -c ./src/disk/disk.c -o ./build/disk/disk.o
+
 #-------------------------------------------------------------------------------
 
 directories:
-	cd ./build && mkdir -p memory && mkdir -p idt && mkdir -p io
+	cd ./build && mkdir -p memory && mkdir -p idt && mkdir -p io && mkdir -p disk
 	cd ./build/memory && mkdir -p heap && mkdir -p paging && cd ..
 .PHONY: directories
 

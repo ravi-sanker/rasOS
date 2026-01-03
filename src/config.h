@@ -14,4 +14,6 @@
 #define RASOS_HEAP_ADDRESS          0x01000000 
 #define RASOS_HEAP_TABLE_ADDRESS    0x00007E00
 
+#define RASOS_SECTOR_SIZE 512
+
 #endif
