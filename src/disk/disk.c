@@ -1,3 +1,4 @@
+#include "fs/file.h"
 #include "io/io.h"
 #include "disk.h"
 #include "memory/memory.h"
@@ -37,6 +38,7 @@ void disk_search_and_init() {
     memset(&disk, 0, sizeof(disk));
     disk.type = RASOS_DISK_TYPE_REAL;
     disk.sector_size = RASOS_SECTOR_SIZE;
+    disk.filesystem = fs_resolve(&disk);
 }
 
 struct disk* disk_get(int index) {

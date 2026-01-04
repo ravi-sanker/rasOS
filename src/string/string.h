@@ -6,5 +6,6 @@
 
 size_t strlen(const char* str);
 bool is_digit(char ch);
+char* strcpy(char* dest, const char* src);
 
 #endif

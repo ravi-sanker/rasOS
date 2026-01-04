@@ -3,7 +3,7 @@ OBJECT_FILES = ./build/kernel.asm.o ./build/kernel.o ./build/idt/idt.asm.o \
 	./build/memory/heap/heap.o ./build/memory/heap/kheap.o \
 	./build/memory/paging/paging.o ./build/memory/paging/paging.asm.o \
 	./build/disk/disk.o ./build/disk/streamer.o ./build/fs/pparser.o \
-	./build/string/string.o
+	./build/string/string.o ./build/fs/file.o ./build/fs/fat/fat16.o
 
 INCLUDES =  -I./src
 
@@ -76,13 +76,19 @@ all: clean directories ./bin/boot.bin ./bin/kernel.bin
 ./build/fs/pparser.o: ./src/fs/pparser.c
 	i686-elf-gcc $(INCLUDES) -I./src/fs $(C_FLAGS) -std=gnu99 -c ./src/fs/pparser.c -o ./build/fs/pparser.o
 
+./build/fs/file.o: ./src/fs/file.c
+	i686-elf-gcc $(INCLUDES) -I./src/fs $(C_FLAGS) -std=gnu99 -c ./src/fs/file.c -o ./build/fs/file.o
+
+./build/fs/fat/fat16.o: ./src/fs/fat/fat16.c
+	i686-elf-gcc $(INCLUDES) -I./src/fs $(C_FLAGS) -std=gnu99 -c ./src/fs/fat/fat16.c -o ./build/fs/fat/fat16.o
+
 ./build/string/string.o: ./src/string/string.c
 	i686-elf-gcc $(INCLUDES) -I./src/string $(C_FLAGS) -std=gnu99 -c ./src/string/string.c -o ./build/string/string.o
 #-------------------------------------------------------------------------------
 
 directories:
 	cd ./build && mkdir -p memory && mkdir -p idt && mkdir -p io && mkdir -p disk \
-	&& mkdir -p fs && mkdir -p string
+	&& mkdir -p fs && cd fs && mkdir -p fat && cd .. && mkdir -p string
 	cd ./build/memory && mkdir -p heap && mkdir -p paging && cd ..
 	mkdir -p ./mnt/d && echo "Hello, World!" > hello.txt
 .PHONY: directories

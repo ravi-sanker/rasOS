@@ -16,4 +16,6 @@
 
 #define RASOS_SECTOR_SIZE 512
 
+#define RASOS_MAX_FILESYSTEMS       12
+#define RASOS_MAX_FILEDESCRIPTORS   512
 #endif
