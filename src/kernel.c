@@ -81,7 +81,7 @@ void kernel_main() {
 
     enable_interrupts();
 
-    int fd = fopen("0:/hello.txt", "r");
+    int fd = fopen("0:/hello2.txt", "r");
     if (fd) {
         terminal_print("We opened hello.txt\n");
     }

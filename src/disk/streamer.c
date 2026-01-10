@@ -35,14 +35,12 @@ int diskstreamer_read(struct disk_stream* stream, void* out, int total) {
         return res;
     }
 
-    for (int i = 0; i < bytes_in_current_sector; i++)
-    {
+    for (int i = 0; i < bytes_in_current_sector; i++) {
         *(char*)out++ = buf[offset+i];
     }
 
     stream->pos += bytes_in_current_sector;
-    if (is_overflow)
-    {
+    if (is_overflow) {
         res = diskstreamer_read(stream, out, total-bytes_in_current_sector);
     }
 
