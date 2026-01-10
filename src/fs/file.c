@@ -62,6 +62,11 @@ static int file_new_descriptor(struct file_descriptor** desc_out) {
     return res;
 }
 
+static void file_free_descriptor(struct file_descriptor* desc) {
+    file_descriptors[desc->index-1] = 0x00;
+    kfree(desc);
+}
+
 static struct file_descriptor* file_get_descriptor(int fd) {
     if (fd <= 0 || fd >= RASOS_MAX_FILEDESCRIPTORS) {
         return 0;
@@ -150,5 +155,65 @@ out:
     if (res < 0)
         res = 0;
 
+    return res;
+}
+
+int fread(void* out, uint32_t size, uint32_t nmemb, int fd) {
+    int res = 0;
+    if (size <= 0 || nmemb <= 0 || fd < 1) {
+        res = -EINVARG;
+        goto out;
+    }
+
+    struct file_descriptor* descriptor = file_get_descriptor(fd);
+    if (!descriptor) {
+        res = -EINVARG;
+        goto out;
+    }
+
+    res = descriptor->filesystem->read(descriptor->disk, descriptor->private_data, size, nmemb, (char*)out);
+out:
+    return res;
+}
+
+int fseek(int fd, int offset, FILE_SEEK_MODE whence) {
+    int res = 0;
+    struct file_descriptor* desc = file_get_descriptor(fd);
+    if (!fd) {
+        res = EINVARG;
+        goto out;
+    }
+
+    res = desc->filesystem->seek(desc->private_data, offset, whence);
+out:
+    return res;
+}
+
+int fstat(int fd, struct file_stat* stat) {
+    int res = 0;
+    struct file_descriptor* desc = file_get_descriptor(fd);
+    if (!desc) {
+        res = -EINVARG;
+        goto out;
+    }
+
+    res = desc->filesystem->stat(desc->disk, desc->private_data, stat);
+out:
+    return res;
+}
+
+int fclose(int fd) {
+    int res = 0;
+    struct file_descriptor* desc = file_get_descriptor(fd);
+    if (!desc) {
+        res = -EINVARG;
+        goto out;
+    }
+
+    res = desc->filesystem->close(desc->private_data);
+    if (res == OK) {
+        file_free_descriptor(desc);
+    }
+out:
     return res;
 }
