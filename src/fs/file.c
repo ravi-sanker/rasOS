@@ -5,6 +5,8 @@
 #include "status.h"
 #include "kernel.h"
 #include "fs/fat/fat16.h"
+#include "string/string.h"
+#include "disk/disk.h"
 
 struct filesystem* filesystems[RASOS_MAX_FILESYSTEMS];
 struct file_descriptor* file_descriptors[RASOS_MAX_FILEDESCRIPTORS];
@@ -82,6 +84,71 @@ struct filesystem* fs_resolve(struct disk* disk) {
     return fs;
 }
 
-int fopen(const char* filename, const char* mode) {
-    return -EIO;
+FILE_MODE file_get_mode_by_string(const char* str) {
+    FILE_MODE mode = FILE_MODE_INVALID;
+
+    if (strncmp(str, "r", 1) == 0) {
+        mode = FILE_MODE_READ;
+    } else if(strncmp(str, "w", 1) == 0) {
+        mode = FILE_MODE_WRITE;
+    } else if(strncmp(str, "a", 1) == 0) {
+        mode = FILE_MODE_APPEND;
+    }
+
+    return mode;
+}
+
+int fopen(const char* filename, const char* mode_str) {
+    int res = 0;
+    struct path_root* root_path = pathparser_parse(filename, NULL);
+    if (!root_path) {
+        res = -EINVARG;
+        goto out;
+    }
+
+    // The first element in the path needs to be present. The request should
+    // atleast be for a root file.
+    if (!root_path->first) {
+        res = -EINVARG;
+        goto out;
+    }
+
+    struct disk* disk = disk_get(root_path->drive_number);
+    if (!disk) {
+        res = -EIO;
+        goto out;
+    }
+    if (!disk->filesystem) {
+        res = -EIO;
+        goto out;
+    }
+
+    FILE_MODE mode = file_get_mode_by_string(mode_str);
+    if (mode == FILE_MODE_INVALID) {
+        res = -EINVARG;
+        goto out;
+    }
+
+    void* descriptor_private_data = disk->filesystem->open(disk, root_path->first, mode);
+    if (ISERR(descriptor_private_data)) {
+        res = ERROR_I(descriptor_private_data);
+        goto out;
+    }
+
+    struct file_descriptor* descriptor = 0;
+    res = file_new_descriptor(&descriptor);
+    if (res < 0) {
+        goto out;
+    }
+    descriptor->filesystem = disk->filesystem;
+    descriptor->private_data = descriptor_private_data;
+    descriptor->disk = disk;
+    res = descriptor->index;
+
+out:
+    // File descriptors cannot be negative. So return 0. 
+    if (res < 0)
+        res = 0;
+
+    return res;
 }

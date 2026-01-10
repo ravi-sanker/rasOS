@@ -7,6 +7,10 @@
 
 #define RASOS_PATH_MAX_LEN 128
 
+#define ERROR(value) (void*)(value)
+#define ERROR_I(value) (int)(value)
+#define ISERR(value) ((int)value < 0)
+
 void kernel_main();
 void terminal_print(const char* str);
 

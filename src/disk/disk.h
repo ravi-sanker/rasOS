@@ -10,8 +10,9 @@ typedef unsigned int RASOS_DISK_TYPE;
 struct disk {
     RASOS_DISK_TYPE type;
     int sector_size;
-
+    int id;
     struct filesystem* filesystem;
+    void* fs_private;
 };
 
 void disk_search_and_init();
