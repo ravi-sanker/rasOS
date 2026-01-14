@@ -18,4 +18,16 @@
 
 #define RASOS_MAX_FILESYSTEMS       12
 #define RASOS_MAX_FILEDESCRIPTORS   512
+
+#define RASOS_TOTAL_GDT_SEGMENTS 6
+
+#define RASOS_PROGRAM_VIRTUAL_ADDRESS               0x400000  // this is just chosen by convention
+#define RASOS_USER_PROGRAM_STACK_SIZE               1024 * 16
+#define RASOS_PROGRAM_VIRTUAL_STACK_ADDRESS_START   0x3FF000
+#define RASOS_PROGRAM_VIRTUAL_STACK_ADDRESS_END     RASOS_PROGRAM_VIRTUAL_ADDRESS_START - RASOS_USER_PROGRAM_STACK_SIZE
+
+// These are defined based on the GDT offset for these segments.
+#define USER_DATA_SEGMENT 0x23
+#define USER_CODE_SEGMENT 0x1b
+
 #endif

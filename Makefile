@@ -3,7 +3,9 @@ OBJECT_FILES = ./build/kernel.asm.o ./build/kernel.o ./build/idt/idt.asm.o \
 	./build/memory/heap/heap.o ./build/memory/heap/kheap.o \
 	./build/memory/paging/paging.o ./build/memory/paging/paging.asm.o \
 	./build/disk/disk.o ./build/disk/streamer.o ./build/fs/pparser.o \
-	./build/string/string.o ./build/fs/file.o ./build/fs/fat/fat16.o
+	./build/string/string.o ./build/fs/file.o ./build/fs/fat/fat16.o \
+	./build/gdt/gdt.asm.o ./build/gdt/gdt.o ./build/task/tss.asm.o \
+	./build/task/task.o
 
 INCLUDES =  -I./src
 
@@ -84,11 +86,25 @@ all: clean directories ./bin/boot.bin ./bin/kernel.bin
 
 ./build/string/string.o: ./src/string/string.c
 	i686-elf-gcc $(INCLUDES) -I./src/string $(C_FLAGS) -std=gnu99 -c ./src/string/string.c -o ./build/string/string.o
+
+./build/gdt/gdt.o: ./src/gdt/gdt.c
+	i686-elf-gcc $(INCLUDES) -I./src/gdt $(C_FLAGS) -std=gnu99 -c ./src/gdt/gdt.c -o ./build/gdt/gdt.o
+
+./build/gdt/gdt.asm.o: ./src/gdt/gdt.asm
+	nasm -f elf -g ./src/gdt/gdt.asm -o ./build/gdt/gdt.asm.o
+
+./build/task/tss.asm.o: ./src/task/tss.asm
+	nasm -f elf -g ./src/task/tss.asm -o ./build/task/tss.asm.o
+
+./build/task/task.o: ./src/task/task.c
+	i686-elf-gcc $(INCLUDES) -I./src/task $(C_FLAGS) -std=gnu99 -c ./src/task/task.c -o ./build/task/task.o
+
+
 #-------------------------------------------------------------------------------
 
 directories:
 	cd ./build && mkdir -p memory && mkdir -p idt && mkdir -p io && mkdir -p disk \
-	&& mkdir -p fs && cd fs && mkdir -p fat && cd .. && mkdir -p string
+	&& mkdir -p gdt && mkdir -p task && mkdir -p fs && cd fs && mkdir -p fat && cd .. && mkdir -p string
 	cd ./build/memory && mkdir -p heap && mkdir -p paging && cd ..
 	mkdir -p ./mnt/d && echo "Hello, World!" > hello.txt
 .PHONY: directories

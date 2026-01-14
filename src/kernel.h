@@ -13,5 +13,6 @@
 
 void kernel_main();
 void terminal_print(const char* str);
+void panic(const char* msg);
 
 #endif
