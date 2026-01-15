@@ -54,6 +54,7 @@ int paging_get_indexes(void* virtual_address, uint32_t* directory_index_out, uin
 
 // paging_set sets the corresponding page table entry of the virtual_address to
 // the val that's passed. The starting index of the page directory is expected.
+// The page directory entries are expected to be populated.
 int paging_set(uint32_t* directory, void* virtual_address, uint32_t val) {
     if (!paging_is_aligned(virtual_address)) {
         return -EINVARG;
@@ -88,4 +89,59 @@ void paging_free_4gb(struct paging_4gb_chunk* chunk) {
 
     kfree(chunk->directory_entry);
     kfree(chunk);
+}
+
+void* paging_align_address(void* ptr) {
+    if ((uint32_t)ptr % PAGE_SIZE == 0) {
+        return ptr;
+    }
+
+    return (void*)((uint32_t)ptr + PAGE_SIZE - ((uint32_t)ptr % PAGE_SIZE));
+}
+
+int paging_map(uint32_t* directory, void* virt, void* phys, int flags) {
+    if (((unsigned int)virt % PAGE_SIZE) || ((unsigned int) phys % PAGE_SIZE)) {
+        return -EINVARG;
+    }
+
+    return paging_set(directory, virt, (uint32_t) phys | flags);
+}
+
+int paging_map_range(uint32_t* directory, void* virt, void* phys, int count, int flags) {
+    int res = 0;
+    for (int i = 0; i < count; i++) {
+        res = paging_map(directory, virt, phys, flags);
+        if (res == 0)
+            break;
+        virt += PAGE_SIZE;
+        phys += PAGE_SIZE;
+    }
+
+    return res;
+}
+
+int paging_map_to(uint32_t *directory, void *virt, void *phys, void *phys_end, int flags) {
+    int res = 0;
+    if ((uint32_t)virt % PAGE_SIZE) {
+        res = -EINVARG;
+        goto out;
+    }
+    if ((uint32_t)phys % PAGE_SIZE) {
+        res = -EINVARG;
+        goto out;
+    }
+    if ((uint32_t)phys_end % PAGE_SIZE) {
+        res = -EINVARG;
+        goto out;
+    }
+    if ((uint32_t)phys_end < (uint32_t)phys) {
+        res = -EINVARG;
+        goto out;
+    }
+
+    uint32_t total_bytes = phys_end - phys;
+    int total_pages = total_bytes / PAGE_SIZE;
+    res = paging_map_range(directory, virt, phys, total_pages, flags);
+out:
+    return res;
 }

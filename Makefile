@@ -5,7 +5,7 @@ OBJECT_FILES = ./build/kernel.asm.o ./build/kernel.o ./build/idt/idt.asm.o \
 	./build/disk/disk.o ./build/disk/streamer.o ./build/fs/pparser.o \
 	./build/string/string.o ./build/fs/file.o ./build/fs/fat/fat16.o \
 	./build/gdt/gdt.asm.o ./build/gdt/gdt.o ./build/task/tss.asm.o \
-	./build/task/task.o
+	./build/task/task.o ./build/task/process.o 
 
 INCLUDES =  -I./src
 
@@ -99,6 +99,8 @@ all: clean directories ./bin/boot.bin ./bin/kernel.bin
 ./build/task/task.o: ./src/task/task.c
 	i686-elf-gcc $(INCLUDES) -I./src/task $(C_FLAGS) -std=gnu99 -c ./src/task/task.c -o ./build/task/task.o
 
+./build/task/process.o: ./src/task/process.c
+	i686-elf-gcc $(INCLUDES) -I./src/task $(C_FLAGS) -std=gnu99 -c ./src/task/process.c -o ./build/task/process.o
 
 #-------------------------------------------------------------------------------
 
