@@ -71,7 +71,7 @@ static int process_load_data(const char* filename, struct process* process) {
 int process_map_binary(struct process* process) {
     int res = 0;
     paging_map_to(
-        process->task->page_directory->directory_entry, 
+        process->task->page_directory, 
         (void*) RASOS_PROGRAM_VIRTUAL_ADDRESS, 
         process->ptr, 
         paging_align_address(process->ptr + process->size), 
@@ -117,6 +117,7 @@ int process_load_for_slot(const char* filename, struct process** process, int pr
     task = task_new(_process);
     if (ERROR_I(task) == 0) {
         res = ERROR_I(task);
+        goto out;
     }
 
     strncpy(_process->filename, filename, sizeof(_process->filename));

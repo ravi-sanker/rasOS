@@ -4,6 +4,9 @@
 #include "config.h"
 #include "memory/paging/paging.h"
 
+// ds, es, fs and gs aren't included here because the OS uses paging and the only
+// purpose of segmentation is to get the selector from GDT. These registers will
+// have the same value as ss.
 struct registers {
     uint32_t edi;
     uint32_t esi;
@@ -32,5 +35,13 @@ struct task* task_new(struct process* process);
 struct task* task_current();
 struct task* task_get_next();
 int task_free(struct task* task);
+int task_switch(struct task* task);
+int task_page();
+
+void task_run_first_ever_task();
+
+void task_return(struct registers* regs);
+void restore_general_purpose_registers(struct registers* regs);
+void user_registers();
 
 #endif

@@ -9,4 +9,8 @@ with open('./hello.txt', 'rb') as src:
     with fs.open('/hello.txt', 'wb') as dst:
         dst.write(src.read())
 
+with open('./programs/blank/blank.bin', 'rb') as src:
+    with fs.open('/blank.bin', 'wb') as dst:
+        dst.write(src.read())
+
 fs.close()

@@ -27,7 +27,7 @@
 #define RASOS_PROGRAM_VIRTUAL_STACK_ADDRESS_END     RASOS_PROGRAM_VIRTUAL_ADDRESS_START - RASOS_USER_PROGRAM_STACK_SIZE
 
 // These are defined based on the GDT offset for these segments.
-#define USER_DATA_SEGMENT 0x23
+#define USER_DATA_SEGMENT 0x23 // 0x20 is the offset, G=0 and 11 (ring 3) is RPL.
 #define USER_CODE_SEGMENT 0x1b
 
 #define RASOS_MAX_PROGRAM_ALLOCATIONS   1024

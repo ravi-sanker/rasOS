@@ -14,6 +14,8 @@
 #include "config.h"
 #include "memory/memory.h"
 #include "task/tss.h"
+#include "status.h"
+#include "task/process.h"
 
 uint16_t *video_mem = 0;
 uint16_t terminal_current_row = 0;
@@ -108,26 +110,17 @@ void kernel_main() {
 
     // Setup paging.
     kernel_chunk = paging_new_4gb(PAGING_IS_WRITABLE | PAGING_IS_PRESENT | PAGING_ACCESS_BY_ALL);
-    paging_switch(paging_4gb_chunk_get_directory(kernel_chunk));
+    paging_switch(kernel_chunk);
 
 
     enable_paging();
 
-    enable_interrupts();
-
-    int fd = fopen("0:/hello.txt", "r");
-    if (fd) {
-        terminal_print("We opened hello.txt\n");
-        char buf[20];
-        fseek(fd, 2, SEEK_SET);
-        fread(buf, 20, 1, fd);
-        terminal_print(buf);
-
-        struct file_stat stat;
-        fstat(fd, &stat);
-
-        fclose(fd);
-        terminal_print("end");
+    struct process* process = 0;
+    int res = process_load("0:/blank.bin", &process);
+    if (res != OK) {
+        panic("Failed to load blank.bin\n");
     }
+
+    task_run_first_ever_task();
     while(1) {}
 }

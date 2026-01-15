@@ -4,3 +4,5 @@ build/
 hello.txt
 mnt/
 .clangd
+programs/blank/build
+programs/blank/blank.bin

@@ -27,4 +27,6 @@ struct process {
     void* stack;
 };
 
+int process_load(const char* filename, struct process** process);
+
 #endif

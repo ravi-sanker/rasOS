@@ -5,7 +5,7 @@ OBJECT_FILES = ./build/kernel.asm.o ./build/kernel.o ./build/idt/idt.asm.o \
 	./build/disk/disk.o ./build/disk/streamer.o ./build/fs/pparser.o \
 	./build/string/string.o ./build/fs/file.o ./build/fs/fat/fat16.o \
 	./build/gdt/gdt.asm.o ./build/gdt/gdt.o ./build/task/tss.asm.o \
-	./build/task/task.o ./build/task/process.o 
+	./build/task/task.o ./build/task/process.o ./build/task/task.asm.o
 
 INCLUDES =  -I./src
 
@@ -15,7 +15,7 @@ C_FLAGS = -g -ffreestanding -falign-jumps -falign-functions -falign-labels \
 	-Wno-unused-parameter -nostdlib -nostartfiles -nodefaultlibs -Wall -O0 \
 	-Iinc
 
-all: clean directories ./bin/boot.bin ./bin/kernel.bin
+all: clean directories ./bin/boot.bin ./bin/kernel.bin user_programs
 	dd if=./bin/boot.bin >> ./bin/os.bin
 	dd if=./bin/kernel.bin >> ./bin/os.bin
 	dd if=/dev/zero bs=1048576 count=16 >> ./bin/os.bin
@@ -102,16 +102,28 @@ all: clean directories ./bin/boot.bin ./bin/kernel.bin
 ./build/task/process.o: ./src/task/process.c
 	i686-elf-gcc $(INCLUDES) -I./src/task $(C_FLAGS) -std=gnu99 -c ./src/task/process.c -o ./build/task/process.o
 
+./build/task/task.asm.o: ./src/task/task.asm
+	nasm -f elf -g ./src/task/task.asm -o ./build/task/task.asm.o
+
+#-------------------------------------------------------------------------------
+
+user_programs:
+	cd ./programs/blank && $(MAKE) all
+
+user_programs_clean:
+	cd ./programs/blank && $(MAKE) clean
+
 #-------------------------------------------------------------------------------
 
 directories:
 	cd ./build && mkdir -p memory && mkdir -p idt && mkdir -p io && mkdir -p disk \
 	&& mkdir -p gdt && mkdir -p task && mkdir -p fs && cd fs && mkdir -p fat && cd .. && mkdir -p string
 	cd ./build/memory && mkdir -p heap && mkdir -p paging && cd ..
+	cd programs/blank && mkdir -p build && cd ../..
 	mkdir -p ./mnt/d && echo "Hello, World!" > hello.txt
 .PHONY: directories
 
-clean:
+clean: user_programs_clean
 	rm -rf ./bin/*
 	rm -rf ./build/*
 
