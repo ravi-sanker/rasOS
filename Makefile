@@ -5,7 +5,8 @@ OBJECT_FILES = ./build/kernel.asm.o ./build/kernel.o ./build/idt/idt.asm.o \
 	./build/disk/disk.o ./build/disk/streamer.o ./build/fs/pparser.o \
 	./build/string/string.o ./build/fs/file.o ./build/fs/fat/fat16.o \
 	./build/gdt/gdt.asm.o ./build/gdt/gdt.o ./build/task/tss.asm.o \
-	./build/task/task.o ./build/task/process.o ./build/task/task.asm.o
+	./build/task/task.o ./build/task/process.o ./build/task/task.asm.o \
+	./build/isr80h/isr80h.o ./build/isr80h/misc.o
 
 INCLUDES =  -I./src
 
@@ -105,6 +106,12 @@ all: clean directories ./bin/boot.bin ./bin/kernel.bin user_programs
 ./build/task/task.asm.o: ./src/task/task.asm
 	nasm -f elf -g ./src/task/task.asm -o ./build/task/task.asm.o
 
+./build/isr80h/isr80h.o: ./src/isr80h/isr80h.c
+	i686-elf-gcc $(INCLUDES) -I./src/isr80h $(C_FLAGS) -std=gnu99 -c ./src/isr80h/isr80h.c -o ./build/isr80h/isr80h.o
+
+./build/isr80h/misc.o: ./src/isr80h/misc.c
+	i686-elf-gcc $(INCLUDES) -I./src/isr80h $(C_FLAGS) -std=gnu99 -c ./src/isr80h/misc.c -o ./build/isr80h/misc.o
+
 #-------------------------------------------------------------------------------
 
 user_programs:
@@ -116,7 +123,7 @@ user_programs_clean:
 #-------------------------------------------------------------------------------
 
 directories:
-	cd ./build && mkdir -p memory && mkdir -p idt && mkdir -p io && mkdir -p disk \
+	cd ./build && mkdir -p memory && mkdir -p idt && mkdir -p io && mkdir -p disk && mkdir -p isr80h \
 	&& mkdir -p gdt && mkdir -p task && mkdir -p fs && cd fs && mkdir -p fat && cd .. && mkdir -p string
 	cd ./build/memory && mkdir -p heap && mkdir -p paging && cd ..
 	cd programs/blank && mkdir -p build && cd ../..

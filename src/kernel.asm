@@ -4,6 +4,7 @@ BITS 32
 
 global _start
 global MASTER_PIC_COMMAND_AND_STATUS_REG
+global kernel_registers
 
 ; kernel_main is exposed in kernel.h and implemented in kernel.c.
 ; We are using extern here to tell the assembler that this symbol needs
@@ -60,6 +61,14 @@ _start:
     call kernel_main
 
     jmp $
+
+kernel_registers:
+    mov ax, 0x10
+    mov ds, ax
+    mov es, ax
+    mov gs, ax
+    mov fs, ax
+    ret
 
 ; This is done so that the kernel code takes up an entire sector and the C code
 ; that follows this won't be misaligned. Note that kernel.asm needs to come at

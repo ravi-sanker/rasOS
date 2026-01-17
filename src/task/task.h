@@ -31,6 +31,8 @@ struct task {
     struct process* process;
 };
 
+struct interrupt_frame;
+
 struct task* task_new(struct process* process);
 struct task* task_current();
 struct task* task_get_next();
@@ -43,5 +45,6 @@ void task_run_first_ever_task();
 void task_return(struct registers* regs);
 void restore_general_purpose_registers(struct registers* regs);
 void user_registers();
+void task_current_save_state(struct interrupt_frame *frame);
 
 #endif

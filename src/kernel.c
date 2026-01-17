@@ -16,11 +16,14 @@
 #include "task/tss.h"
 #include "status.h"
 #include "task/process.h"
+#include "isr80h/isr80h.h"
 
 uint16_t *video_mem = 0;
 uint16_t terminal_current_row = 0;
 uint16_t terminal_current_col = 0;
 static struct paging_4gb_chunk* kernel_chunk = 0;
+
+extern void kernel_registers();
 
 uint16_t terminal_make_char(char c, char colour) {
     // colour needs to come to the left due to the little endian format.
@@ -65,6 +68,11 @@ void terminal_initialize() {
 void panic(const char* msg) {
     terminal_print(msg);
     while(1) {}
+}
+
+void kernel_page() {
+    kernel_registers();
+    paging_switch(kernel_chunk);
 }
 
 struct tss tss;
@@ -114,6 +122,8 @@ void kernel_main() {
 
 
     enable_paging();
+
+    isr80h_register_commands();
 
     struct process* process = 0;
     int res = process_load("0:/blank.bin", &process);
