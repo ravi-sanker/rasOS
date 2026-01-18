@@ -162,6 +162,16 @@ int process_load(const char* filename, struct process** process) {
     }
 
     res = process_load_for_slot(filename, process, process_slot);
+    if (res < 0) {
+        goto out;
+    }
+
+    paging_map_to(
+        (*process)->task->page_directory, 
+        (void*)RASOS_PROGRAM_VIRTUAL_STACK_ADDRESS_TOP, 
+        (*process)->stack,
+        paging_align_address((*process)->stack+RASOS_USER_PROGRAM_STACK_SIZE), 
+        PAGING_IS_PRESENT | PAGING_ACCESS_BY_ALL | PAGING_IS_WRITABLE);
 out:
     return res;
 }

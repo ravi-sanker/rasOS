@@ -5,6 +5,8 @@
 #include "memory/heap/kheap.h"
 #include "memory/memory.h"
 #include "idt/idt.h"
+#include "string/string.h"
+#include "memory/paging/paging.h"
 
 
 struct task* current_task = 0;
@@ -22,7 +24,7 @@ int task_init(struct task* task, struct process* process) {
     task->registers.ip = RASOS_PROGRAM_VIRTUAL_ADDRESS;
     task->registers.ss = USER_DATA_SEGMENT;
     task->registers.cs = USER_CODE_SEGMENT;
-    task->registers.esp = RASOS_PROGRAM_VIRTUAL_STACK_ADDRESS_START;
+    task->registers.esp = RASOS_PROGRAM_VIRTUAL_STACK_ADDRESS_BOTTOM;
 
     task->process = process;
 
@@ -107,6 +109,12 @@ int task_page() {
     return 0;
 }
 
+int task_page_task(struct task* task) {
+    user_registers();
+    paging_switch(task->page_directory);
+    return 0;
+}
+
 void task_run_first_ever_task() {
     if (!current_task) {
         panic("task_run_first_ever_task(): No current task exists!\n");
@@ -138,4 +146,58 @@ void task_current_save_state(struct interrupt_frame *frame) {
 
     struct task *task = task_current();
     task_save_state(task, frame);
+}
+
+// copy_string_from task copies the bytes pointed to by virtual_addr
+// of the task to the phys_addr.
+//
+// Why can't we just disable paging and read from the physical address directly?
+// I understand the virtual address could be mapped to something else in the kernel's
+// page tables, but we can simply disable paging and enable.
+int copy_string_from_task(struct task* task, void* virtual_addr, void* phys_addr, int max) {
+    if (max >= PAGE_SIZE) {
+        return -EINVARG;
+    }
+
+    int res = 0;
+    char* string_cpy = kzalloc(max);
+    if (!string_cpy) {
+        res = -ENOMEM;
+        goto out;
+    }
+
+    uint32_t* task_directory = task->page_directory->directory_entry;
+
+    // Preserver the current value as we will be overwriting it.
+    uint32_t page_table_entry = paging_get_table_entry(task_directory, string_cpy);
+    paging_map(task->page_directory, string_cpy, string_cpy, PAGING_IS_WRITABLE | PAGING_IS_PRESENT | PAGING_ACCESS_BY_ALL);
+    paging_switch(task->page_directory);
+    strncpy(string_cpy, virtual_addr, max);
+    kernel_page();
+
+    // Restore the overwritten page table entry for string_cpy in the task's page table.
+    res = paging_set(task_directory, string_cpy, page_table_entry);
+    if (res < 0) {
+        res = -EIO;
+        goto out_free;
+    }
+
+    strncpy(phys_addr, string_cpy, max);
+
+out_free:
+    kfree(string_cpy);
+out:
+    return res;
+}
+
+
+void* task_get_stack_item(struct task* task, int index) {
+    void* result = 0;
+    uint32_t* sp_ptr = (uint32_t*)(task->registers.esp);
+
+    task_page_task(task);
+    result = (void*)sp_ptr[index];
+    kernel_page();
+
+    return result;
 }
