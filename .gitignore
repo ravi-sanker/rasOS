@@ -6,3 +6,4 @@ mnt/
 .clangd
 programs/blank/build
 programs/blank/blank.bin
+programs/blank/blank.elf

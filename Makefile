@@ -7,7 +7,8 @@ OBJECT_FILES = ./build/kernel.asm.o ./build/kernel.o ./build/idt/idt.asm.o \
 	./build/gdt/gdt.asm.o ./build/gdt/gdt.o ./build/task/tss.asm.o \
 	./build/task/task.o ./build/task/process.o ./build/task/task.asm.o \
 	./build/isr80h/isr80h.o ./build/isr80h/syscalls.o ./build/keyboard/keyboard.o \
-	./build/keyboard/qwerty.o ./build/display/display.o
+	./build/keyboard/qwerty.o ./build/display/display.o ./build/loader/formats/elfloader.o \
+	./build/loader/formats/elf.o
 
 INCLUDES =  -I./src
 
@@ -122,6 +123,12 @@ all: clean directories ./bin/boot.bin ./bin/kernel.bin user_programs
 ./build/display/display.o: ./src/display/display.c
 	i686-elf-gcc $(INCLUDES) -I./src/display $(C_FLAGS) -std=gnu99 -c ./src/display/display.c -o ./build/display/display.o
 
+./build/loader/formats/elf.o: ./src/loader/formats/elf.c
+	i686-elf-gcc $(INCLUDES) -I./src/loader/formats $(C_FLAGS) -std=gnu99 -c ./src/loader/formats/elf.c -o ./build/loader/formats/elf.o
+
+./build/loader/formats/elfloader.o: ./src/loader/formats/elfloader.c
+	i686-elf-gcc $(INCLUDES) -I./src/loader/formats $(C_FLAGS) -std=gnu99 -c ./src/loader/formats/elfloader.c -o ./build/loader/formats/elfloader.o
+
 #-------------------------------------------------------------------------------
 
 user_programs:
@@ -135,7 +142,7 @@ user_programs_clean:
 directories:
 	cd ./build && mkdir -p memory && mkdir -p idt && mkdir -p io && mkdir -p disk && mkdir -p isr80h && mkdir -p keyboard\
 	&& mkdir -p display && mkdir -p gdt && mkdir -p task && mkdir -p fs && cd fs && mkdir -p fat && cd .. && mkdir -p string
-	cd ./build/memory && mkdir -p heap && mkdir -p paging && cd ..
+	cd ./build/memory && mkdir -p heap && mkdir -p paging && cd .. && mkdir -p loader/formats && cd loader/formats && cd ../..
 	cd programs/blank && mkdir -p build && cd ../..
 	mkdir -p ./mnt/d && echo "Hello, World!" > hello.txt
 .PHONY: directories

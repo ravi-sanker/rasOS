@@ -6,6 +6,11 @@
 #include "config.h"
 #include "kernel.h"
 
+#define PROCESS_FILETYPE_ELF    0
+#define PROCESS_FILETYPE_BINARY 1
+
+typedef unsigned char PROCESS_FILETYPE;
+
 struct process {
     uint16_t id;
     struct task* task;
@@ -17,8 +22,13 @@ struct process {
     // Just to keep track so that we can free it when the process is killed.
     void* allocations[RASOS_MAX_PROGRAM_ALLOCATIONS];
 
+    PROCESS_FILETYPE filetype;
+
     // The physical pointer to the executable in memory.
-    void* ptr;
+    union {
+        void* ptr;
+        struct elf_file* elf_file;
+    };
 
     // The size of the data pointed to by "ptr".
     uint32_t size;
