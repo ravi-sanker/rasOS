@@ -6,7 +6,8 @@ OBJECT_FILES = ./build/kernel.asm.o ./build/kernel.o ./build/idt/idt.asm.o \
 	./build/string/string.o ./build/fs/file.o ./build/fs/fat/fat16.o \
 	./build/gdt/gdt.asm.o ./build/gdt/gdt.o ./build/task/tss.asm.o \
 	./build/task/task.o ./build/task/process.o ./build/task/task.asm.o \
-	./build/isr80h/isr80h.o ./build/isr80h/misc.o
+	./build/isr80h/isr80h.o ./build/isr80h/syscalls.o ./build/keyboard/keyboard.o \
+	./build/keyboard/qwerty.o ./build/display/display.o
 
 INCLUDES =  -I./src
 
@@ -109,8 +110,17 @@ all: clean directories ./bin/boot.bin ./bin/kernel.bin user_programs
 ./build/isr80h/isr80h.o: ./src/isr80h/isr80h.c
 	i686-elf-gcc $(INCLUDES) -I./src/isr80h $(C_FLAGS) -std=gnu99 -c ./src/isr80h/isr80h.c -o ./build/isr80h/isr80h.o
 
-./build/isr80h/misc.o: ./src/isr80h/misc.c
-	i686-elf-gcc $(INCLUDES) -I./src/isr80h $(C_FLAGS) -std=gnu99 -c ./src/isr80h/misc.c -o ./build/isr80h/misc.o
+./build/isr80h/syscalls.o: ./src/isr80h/syscalls.c
+	i686-elf-gcc $(INCLUDES) -I./src/isr80h $(C_FLAGS) -std=gnu99 -c ./src/isr80h/syscalls.c -o ./build/isr80h/syscalls.o
+
+./build/keyboard/keyboard.o: ./src/keyboard/keyboard.c
+	i686-elf-gcc $(INCLUDES) -I./src/keyboard $(C_FLAGS) -std=gnu99 -c ./src/keyboard/keyboard.c -o ./build/keyboard/keyboard.o
+
+./build/keyboard/qwerty.o: ./src/keyboard/qwerty.c
+	i686-elf-gcc $(INCLUDES) -I./src/keyboard $(C_FLAGS) -std=gnu99 -c ./src/keyboard/qwerty.c -o ./build/keyboard/qwerty.o
+
+./build/display/display.o: ./src/display/display.c
+	i686-elf-gcc $(INCLUDES) -I./src/display $(C_FLAGS) -std=gnu99 -c ./src/display/display.c -o ./build/display/display.o
 
 #-------------------------------------------------------------------------------
 
@@ -123,8 +133,8 @@ user_programs_clean:
 #-------------------------------------------------------------------------------
 
 directories:
-	cd ./build && mkdir -p memory && mkdir -p idt && mkdir -p io && mkdir -p disk && mkdir -p isr80h \
-	&& mkdir -p gdt && mkdir -p task && mkdir -p fs && cd fs && mkdir -p fat && cd .. && mkdir -p string
+	cd ./build && mkdir -p memory && mkdir -p idt && mkdir -p io && mkdir -p disk && mkdir -p isr80h && mkdir -p keyboard\
+	&& mkdir -p display && mkdir -p gdt && mkdir -p task && mkdir -p fs && cd fs && mkdir -p fat && cd .. && mkdir -p string
 	cd ./build/memory && mkdir -p heap && mkdir -p paging && cd ..
 	cd programs/blank && mkdir -p build && cd ../..
 	mkdir -p ./mnt/d && echo "Hello, World!" > hello.txt

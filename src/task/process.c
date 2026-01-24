@@ -21,6 +21,11 @@ struct process* process_current() {
     return current_process;
 }
 
+int process_switch(struct process* process) {
+    current_process = process;
+    return 0;
+}
+
 struct process* process_get(int process_id) {
     if (process_id < 0 || process_id >= RASOS_MAX_PROCESSES) {
         return 0;
@@ -173,5 +178,14 @@ int process_load(const char* filename, struct process** process) {
         paging_align_address((*process)->stack+RASOS_USER_PROGRAM_STACK_SIZE), 
         PAGING_IS_PRESENT | PAGING_ACCESS_BY_ALL | PAGING_IS_WRITABLE);
 out:
+    return res;
+}
+
+int process_load_switch(const char* filename, struct process** process) {
+    int res = process_load(filename, process);
+    if (res == 0) {
+        process_switch(*process);
+    }
+
     return res;
 }
