@@ -132,10 +132,12 @@ all: clean directories ./bin/boot.bin ./bin/kernel.bin user_programs
 #-------------------------------------------------------------------------------
 
 user_programs:
+	cd ./programs/stdlib && $(MAKE) all
 	cd ./programs/blank && $(MAKE) all
 
 user_programs_clean:
 	cd ./programs/blank && $(MAKE) clean
+	cd ./programs/stdlib && $(MAKE) clean
 
 #-------------------------------------------------------------------------------
 
@@ -144,6 +146,7 @@ directories:
 	&& mkdir -p display && mkdir -p gdt && mkdir -p task && mkdir -p fs && cd fs && mkdir -p fat && cd .. && mkdir -p string
 	cd ./build/memory && mkdir -p heap && mkdir -p paging && cd .. && mkdir -p loader/formats && cd loader/formats && cd ../..
 	cd programs/blank && mkdir -p build && cd ../..
+	cd programs/stdlib && mkdir -p build && cd ../..
 	mkdir -p ./mnt/d && echo "Hello, World!" > hello.txt
 .PHONY: directories
 

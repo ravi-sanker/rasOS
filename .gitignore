@@ -7,3 +7,5 @@ mnt/
 programs/blank/build
 programs/blank/blank.bin
 programs/blank/blank.elf
+programs/stdlib/build
+programs/stdlib/stdlib.elf
