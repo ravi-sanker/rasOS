@@ -185,3 +185,7 @@ void elf_close(struct elf_file* file) {
     kfree(file->elf_memory);
     kfree(file);
 }
+
+void* elf_phdr_phys_address(struct elf_file* file, struct elf32_phdr* phdr) {
+    return elf_memory(file)+phdr->p_offset;
+}
